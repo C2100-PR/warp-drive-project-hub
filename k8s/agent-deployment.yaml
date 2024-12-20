@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-agent-cluster
+  namespace: ai-agents
+spec:
+  replicas: 10
+  selector:
+    matchLabels:
+      app: ai-agents
+  template:
+    metadata:
+      labels:
+        app: ai-agents
+    spec:
+      containers:
+      - name: ai-agent-container
+        image: gcr.io/api-for-warp-drive/ai-agents:latest
+        envFrom:
+        - secretRef:
+            name: agent-api-keys
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1"
+          limits:
+            memory: "4Gi"
+            cpu: "2"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-agent-service
+  namespace: ai-agents
+spec:
+  selector:
+    app: ai-agents
+  ports:
+  - port: 80
+    targetPort: 8080
+  type: ClusterIP
